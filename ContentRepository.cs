@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LibraryApp.DAL
 {
@@ -14,7 +15,7 @@ namespace LibraryApp.DAL
         public void Add(Content content)
         {
             _context.Contents.Add(content);
-            _context.SaveChanges();
+            SaveChanges();
         }
 
         public void Remove(int contentId)
@@ -23,19 +24,50 @@ namespace LibraryApp.DAL
             if (content != null)
             {
                 _context.Contents.Remove(content);
-                _context.SaveChanges();
+                SaveChanges();
             }
         }
 
-        public Content GetById(int id) => _context.Contents.Find(id);
+        public Content? GetById(int id)
+        {
+            var content = _context.Contents.Find(id);
 
-        public IEnumerable<Content> GetAll() => _context.Contents.ToList();
+            if (content != null)
+            {
+                _context.Entry(content).Reference(c => c.Storage).Load();
+                _context.Entry(content).Collection(c => c.Tags).Load();
+            }
+
+            return content;
+        }
+
+        public IEnumerable<Content> GetAll()
+        {
+            return _context.Contents
+                .Include(c => c.Storage) // Жадібне завантаження
+                .Include(c => c.Tags)
+                //.Include(c => c.Metadata)
+                .ToList();
+        }
 
         public IEnumerable<Content> Search(string query)
         {
-            return _context.Contents
+            var filtered = _context.Contents
                 .Where(c => c.Title.Contains(query) || c.Type.Contains(query))
                 .ToList();
+
+            foreach (var content in filtered)
+            {
+                _context.Entry(content).Reference(c => c.Storage).Load();
+                _context.Entry(content).Collection(c => c.Tags).Load();
+            }
+
+            return filtered;
+        }
+
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
         }
     }
 }

@@ -9,5 +9,6 @@ namespace LibraryApp.DAL
         Content GetById(int id);
         IEnumerable<Content> GetAll();
         IEnumerable<Content> Search(string query);
+        void SaveChanges();
     }
 }
