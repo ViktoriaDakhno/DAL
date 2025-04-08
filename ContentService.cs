@@ -1,6 +1,5 @@
 ﻿using LibraryApp.DAL;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 
 namespace LibraryApp.BLL
 {
@@ -13,16 +12,10 @@ namespace LibraryApp.BLL
             _contentRepository = contentRepository;
         }
 
-        public void AddContent(string title, string format, string location, string type, string additionalInfo)
+        public void AddContent(int type, string title, string format, string location, string additionalInfo, int storageId)
         {
-            Content content = type switch
-            {
-                "Book" => new Book { Title = title, Format = format, Location = location, Type = type, Author = additionalInfo },
-                "Document" => new Document { Title = title, Format = format, Location = location, Type = type, Author = additionalInfo },
-                "Video" => new Video { Title = title, Format = format, Location = location, Type = type, Director = additionalInfo },
-                "Audio" => new Audio { Title = title, Format = format, Location = location, Type = type, Artist = additionalInfo },
-                _ => throw new ArgumentException("Invalid content type")
-            };
+            var content = ContentFactory.CreateContent(type, title, format, location, additionalInfo, storageId);
+            //content.Tags = tags;
             _contentRepository.Add(content);
         }
 
@@ -35,6 +28,12 @@ namespace LibraryApp.BLL
         {
             return _contentRepository.Search(query);
         }
+
+        //public IEnumerable<Content> SearchByTag(string tagName)
+        //{
+        //    return _contentRepository.GetAll()
+        //        .Where(c => c.Tags.Any(t => t.Name.Equals(tagName, StringComparison.OrdinalIgnoreCase)));
+        //}
 
         public IEnumerable<Content> GetAllContent()
         {
