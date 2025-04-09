@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -48,7 +49,7 @@ namespace Lab4_.Migrations
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StorageId = table.Column<int>(type: "int", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
                     Artist = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Author = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Document_Author = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -89,6 +90,27 @@ namespace Lab4_.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Metadata",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ContentId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Metadata", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Metadata_Contents_ContentId",
+                        column: x => x.ContentId,
+                        principalTable: "Contents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Contents_StorageId",
                 table: "Contents",
@@ -98,6 +120,12 @@ namespace Lab4_.Migrations
                 name: "IX_ContentTag_TagsId",
                 table: "ContentTag",
                 column: "TagsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Metadata_ContentId",
+                table: "Metadata",
+                column: "ContentId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -107,10 +135,13 @@ namespace Lab4_.Migrations
                 name: "ContentTag");
 
             migrationBuilder.DropTable(
-                name: "Contents");
+                name: "Metadata");
 
             migrationBuilder.DropTable(
                 name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "Contents");
 
             migrationBuilder.DropTable(
                 name: "Storages");
