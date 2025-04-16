@@ -15,7 +15,6 @@ namespace LibraryApp.UI
 
             var options = new DbContextOptionsBuilder<LibraryContext>()
                 .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=LibraryDb;Trusted_Connection=True;Encrypt=False;TrustServerCertificate=True")
-
                 .Options;
 
             var context = new LibraryContext(options);
@@ -37,7 +36,8 @@ namespace LibraryApp.UI
                 Console.WriteLine("2. Видалити контент");
                 Console.WriteLine("3. Пошук контенту");
                 Console.WriteLine("4. Переглянути весь контент");
-                Console.WriteLine("5. Вихід");
+                Console.WriteLine("5. Переглянути деталі контенту"); // Новий пункт меню
+                Console.WriteLine("6. Вихід");
                 Console.Write("Виберіть опцію: ");
 
                 var choice = Console.ReadLine();
@@ -57,6 +57,9 @@ namespace LibraryApp.UI
                         ViewAllContent(contentService);
                         break;
                     case "5":
+                        ViewContentDetails(repository); // Виклик нового методу
+                        break;
+                    case "6":
                         return;
                     default:
                         Console.WriteLine("Невірний вибір. Спробуйте ще раз.");
@@ -94,7 +97,6 @@ namespace LibraryApp.UI
             Console.Write("Введіть додаткову інформацію (Автор, Режисер, Артист): ");
             var additionalInfo = Console.ReadLine();
 
-            // Вибір сховища – демонстраційно вибираємо перший запис
             var storage = context.Storages.FirstOrDefault();
             if (storage == null)
             {
@@ -143,5 +145,35 @@ namespace LibraryApp.UI
                 Console.WriteLine($"{content.Id}\t{content.Title,-15}\t{content.Type,-10}\t{content.Format,-10}\t{content.Location}");
             }
         }
+
+        static void ViewContentDetails(ContentRepository repository)
+        {
+            Console.WriteLine("Введіть ID контенту для перегляду деталей:");
+            if (int.TryParse(Console.ReadLine(), out int contentId))
+            {
+                var content = repository.GetById(contentId);
+
+                if (content != null)
+                {
+                    // Ліниве завантаження виконується тут:
+                    var storage = content.Storage; // SQL-запит до таблиці Storage
+                    var tags = content.Tags;       // SQL-запит до таблиці Tags
+
+                    Console.WriteLine($"Назва контенту: {content.Title}");
+                    Console.WriteLine($"Місцезнаходження зберігання: {storage?.Location}");
+                    Console.WriteLine("Теги: " + string.Join(", ", tags.Select(t => t.Name)));
+
+                }
+                else
+                {
+                    Console.WriteLine("Контент не знайдено.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Неправильний ID.");
+            }
+        }
+
     }
 }

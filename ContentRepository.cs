@@ -30,27 +30,25 @@ namespace LibraryApp.DAL
 
         public Content? GetById(int id)
         {
+            // Завантажує лише об'єкт Content за його Id
             var content = _context.Contents.Find(id);
 
-            if (content != null)
-            {
-                _context.Entry(content).Reference(c => c.Storage).Load();
-                _context.Entry(content).Collection(c => c.Tags).Load();
-            }
-
+            // Ліниве завантаження автоматично виконає запити до бази,
+            // коли ви звернетеся до content.Storage або content.Tags.
             return content;
         }
+
 
         public IEnumerable<Content> GetAll()
         {
             return _context.Contents
                 .Include(c => c.Storage) // Жадібне завантаження
                 .Include(c => c.Tags)
-                //.Include(c => c.Metadata)
+                .Include(c => c.Metadata)
                 .ToList();
         }
 
-        public IEnumerable<Content> Search(string query)
+        public IEnumerable<Content> Search(string query)   
         {
             var filtered = _context.Contents
                 .Where(c => c.Title.Contains(query) || c.Type.Contains(query))

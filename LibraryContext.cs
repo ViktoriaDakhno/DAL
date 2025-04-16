@@ -29,7 +29,7 @@ namespace LibraryApp.DAL
                 .HasOne(c => c.Metadata)
                 .WithOne(m => m.Content)
                 .HasForeignKey<Metadata>(m => m.ContentId);
-
+            
             modelBuilder.Entity<Content>()
                 .HasMany(c => c.Tags)
                 .WithMany(t => t.Contents);

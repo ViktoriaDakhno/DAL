@@ -89,6 +89,6 @@ namespace LibraryApp.DAL
         [Required]
         public string Name { get; set; }
 
-        public virtual ICollection<Content> Contents { get; set; } = new List<Content>();
+        public virtual ICollection<Content> Contents { get; set; } = new List<Content>(); 
     }
 }
